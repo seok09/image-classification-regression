@@ -1,41 +1,64 @@
 # image-classification-regression
-# 이미지 분류(Image Classification) vs 이미지 회귀(Image Regression)
+# 이미지 분류(Image Classification) vs 회귀(Regression)
 
-컴퓨터 비전 분야에서 이미지를 분석하는 문제는 크게 두 가지로 나뉩니다: **이미지 분류(Image Classification)**와 **이미지 회귀(Image Regression)**. 두 접근법은 모델의 목표, 출력 형태, 손실 함수, 평가 방법 등에서 차이가 있습니다. 이 문서에서는 두 개념을 상세하게 비교하고, 예시와 함께 이해를 돕습니다.
+## 1. 정의
+
+### 이미지 분류 (Image Classification)
+- 이미지가 **어떤 카테고리**에 속하는지 예측하는 문제
+- 예시: 고양이 사진인지, 강아지 사진인지 맞추기
+- 결과값: 범주(label) → 보통 **정수나 문자열** 형태
+- 유형: **범주형 데이터(categorical)** 문제
+
+### 회귀 (Regression)
+- 이미지에 대해 **연속적인 값**을 예측하는 문제
+- 예시: 사진 속 사람의 나이, 집값, 온도
+- 결과값: **숫자(float)** → 연속적인 값
+- 유형: **연속형 데이터(continuous)** 문제
 
 ---
 
-## 1. 이미지 분류(Image Classification)
+## 2. 입력 데이터(Input)
+- 둘 다 **이미지**를 입력으로 사용 가능
+- 이미지 → 픽셀값 → 모델 입력
 
-### 정의
-이미지를 **사전에 정의된 클래스 중 하나로 분류**하는 문제입니다.  
-즉, 모델의 목표는 입력 이미지를 보고 "어떤 카테고리에 속하는가?"를 결정하는 것입니다.
+예시:
 
-### 특징
-- **출력(Output)**: 클래스 레이블(Label)
-  - 예: 고양이, 강아지, 자동차 등
-- **데이터(Label)**: 범주형(Categorical)  
-- **손실 함수(Loss Function)**: 주로 `Cross-Entropy Loss`
-- **평가 지표(Metrics)**: Accuracy, Precision, Recall, F1-score 등
-- **모델 구조**: 마지막 레이어에서 Softmax 활성화 함수를 사용하여 각 클래스의 확률을 예측
-
-### 실제 예시
-| 이미지 | 라벨 |
+| 픽셀값 | 의미 |
 |--------|------|
-| 🐱     | 고양이 |
-| 🐶     | 강아지 |
-| 🚗     | 자동차 |
+| [0, 255, 128, ...] | 이미지 밝기 및 색 정보 |
 
-#### 코드 예시 (PyTorch)
-```python
-import torch
-import torch.nn as nn
+---
 
-model = nn.Sequential(
-    nn.Conv2d(3, 16, 3, 1),
-    nn.ReLU(),
-    nn.MaxPool2d(2),
-    nn.Flatten(),
-    nn.Linear(16*30*30, 3),  # 3 classes
-    nn.Softmax(dim=1)
-)
+## 3. 출력 데이터(Output)
+
+### 이미지 분류
+- 출력: 클래스 확률
+- 예시: 
+  - `[0.8, 0.1, 0.1]` → 첫 번째 클래스(고양이) 확률 80%
+  - 예측값: **가장 높은 확률 클래스 선택**
+
+### 회귀
+- 출력: 연속적인 숫자
+- 예시:
+  - `25.3` → 사람의 나이
+  - `350000.0` → 집값
+
+---
+
+## 4. 사용되는 손실 함수(Loss Function)
+
+| 문제 유형 | 손실 함수 예시 |
+|-----------|----------------|
+| 분류 | Cross-Entropy Loss, Focal Loss |
+| 회귀 | Mean Squared Error (MSE), Mean Absolute Error (MAE) |
+
+---
+
+## 5. 모델 구조 차이
+
+- 분류: 마지막 레이어 **Softmax** → 클래스 확률 계산
+- 회귀: 마지막 레이어 **Linear/None** → 연속 값 출력
+
+```text
+이미지 -> CNN/ResNet -> Fully Connected -> Softmax -> 클래스 확률  # 분류
+이미지 -> CNN/ResNet -> Fully Connected -> 숫자 출력                # 회귀
